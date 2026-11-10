@@ -20,6 +20,7 @@ export const S = {
   offSubtitle: 'Unit off · no airflow',
   standbySubtitle: 'Standby · fans stopped',
   separator: ' · ',
+  fanText: (v: string) => `fan ${v}`,
   bypassOpen: 'Bypass open',
   bypassClosed: 'Bypass closed',
   heaterOn: 'Heater on',

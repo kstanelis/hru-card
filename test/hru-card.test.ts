@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../src/hru-card';
+import { MotionController } from '../src/motion';
 import type { HruCard } from '../src/hru-card';
 import type { HassEntity, HomeAssistant, HruCardConfig } from '../src/types';
 import { makeHass, state } from './helpers';
@@ -121,6 +122,27 @@ describe('hru-card element', () => {
     expect(internals(el).shouldUpdate(new Map([['hass', undefined]]))).toBe(true);
     el.hass = { ...hass, themes: { darkMode: true } };
     expect(internals(el).shouldUpdate(new Map([['hass', hass]]))).toBe(true);
+  });
+
+  it('renders the flow layout', async () => {
+    const el = await mount();
+    expect(el.shadowRoot?.querySelector('ha-card .diagram')).not.toBeNull();
+    expect(el.shadowRoot?.querySelector('ha-card .header')).not.toBeNull();
+  });
+
+  it('syncs motion with the model after each render', async () => {
+    const sync = vi.spyOn(MotionController.prototype, 'sync').mockImplementation(() => undefined);
+    const el = await mount();
+    const [root, motion, enabled] = sync.mock.calls[0] ?? [];
+    expect(root).toBe(el.shadowRoot);
+    expect(motion).toEqual({ supply: null, extract: null, spin: null });
+    expect(enabled).toBe(true);
+  });
+
+  it('syncs motion disabled when animations are off', async () => {
+    const sync = vi.spyOn(MotionController.prototype, 'sync').mockImplementation(() => undefined);
+    await mount({ ...CONFIG, animations: false });
+    expect(sync).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), false);
   });
 
   it('getCardSize per layout', async () => {

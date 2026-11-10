@@ -150,9 +150,9 @@ export function buildModel(hass: HomeAssistant, config: HruCardConfig): CardMode
   );
   const recovery =
     sensorEff !== null
-      ? { value: Math.round(sensorEff), approx: false }
+      ? { value: Math.round(sensorEff), approx: false, entity: config.efficiency ?? null }
       : computed !== null
-        ? { value: computed, approx: true }
+        ? { value: computed, approx: true, entity: null }
         : null;
 
   let subtitle: string;

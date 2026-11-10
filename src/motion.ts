@@ -78,6 +78,8 @@ export class MotionController implements ReactiveController {
         duration: BASE_MS,
         iterations: Infinity,
       });
+      // cancel() rejects `finished`; nothing awaits it, so keep it from surfacing as unhandled.
+      animation.finished.catch(() => undefined);
       entry = { animation, rate: -1 };
       this.entries.set(el, entry);
     }
