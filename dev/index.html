@@ -46,6 +46,7 @@
     <div class="controls" id="controls"></div>
     <div class="cards" id="cards"></div>
     <script type="module">
+      import { ICONS } from './icons.js';
       // Minimal stand-ins for HA elements so the card renders outside Home Assistant.
       customElements.define('ha-card', class extends HTMLElement {});
       customElements.define(
@@ -53,12 +54,20 @@
         class extends HTMLElement {
           static observedAttributes = ['icon'];
           attributeChangedCallback() {
-            this.textContent = '◉';
-            this.title = this.getAttribute('icon') ?? '';
+            // Render in a shadow root like the real ha-icon: writing light-DOM children
+            // while lit clones its template shifts lit's node indices.
+            const root = this.shadowRoot ?? this.attachShadow({ mode: 'open' });
+            const name = this.getAttribute('icon') ?? '';
+            const d = ICONS[name];
+            this.title = name;
+            this.style.display = 'inline-flex';
+            root.innerHTML = d
+              ? `<svg viewBox="0 0 24 24" style="width: var(--mdc-icon-size, 24px); height: var(--mdc-icon-size, 24px)"><path fill="currentColor" d="${d}"></path></svg>`
+              : '◉';
           }
         },
       );
-      import('../dist/hru-card.js').then(async () => {
+      import(`../dist/hru-card.js?t=${Date.now()}`).then(async () => {
         const { makeHass, values, config } = await import('./fake-hass.js');
         const cards = ['flow', 'lanes', 'compact'].map((layout) => {
           const el = document.createElement('hru-card');

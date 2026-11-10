@@ -1,7 +1,7 @@
 import { css, html, nothing, svg, type TemplateResult } from 'lit';
 import { S } from '../strings';
 import type { CardModel, FanValue, RenderCtx, TempKey } from '../types';
-import { renderChips, renderHeader, renderStopped, tappable } from './shared';
+import { renderChips, renderHeader, renderRecovery, renderTemp, tappable } from './shared';
 
 const SUPPLY_PATH = 'M 20 60 C 170 60, 268 180, 418 180';
 const EXTRACT_PATH = 'M 418 60 C 268 60, 170 180, 20 180';
@@ -19,13 +19,6 @@ const ducts = svg`
   <path class="dots" data-motion="extract" d=${EXTRACT_PATH}></path>
 `;
 
-function tempValue(m: CardModel, key: TempKey, ctx: RenderCtx): TemplateResult {
-  const t = m.temps[key];
-  return t
-    ? tappable(t.entity, ctx, html`<span class="temp">${t.display}</span>`)
-    : html`<span class="temp">${S.noValue}</span>`;
-}
-
 function caption(key: TempKey, fan: FanValue | undefined): string {
   return fan ? `${S[key]}${S.separator}${S.fanText(fan.display)}` : S[key];
 }
@@ -38,21 +31,15 @@ function corner(
   labelFirst = true,
 ): TemplateResult {
   const label = html`<span class="label">${caption(key, fan)}</span>`;
-  const value = tempValue(m, key, ctx);
+  const value = renderTemp(m, key, ctx);
   return html`<div class="corner corner--${key}">
     ${labelFirst ? html`${label}${value}` : html`${value}${label}`}
   </div>`;
 }
 
 function badge(m: CardModel, ctx: RenderCtx): TemplateResult | typeof nothing {
-  if (m.stopped) return html`<div class="badge">${renderStopped(m, 26)}</div>`;
-  const r = m.recovery;
-  if (!r) return nothing;
-  const pct = html`<span class="pct">${r.approx ? '≈' : ''}${String(r.value)}%</span>`;
-  return html`<div class="badge">
-    ${r.entity ? tappable(r.entity, ctx, pct) : pct}
-    <span class="label">${S.recovery}</span>
-  </div>`;
+  const content = renderRecovery(m, ctx, 26);
+  return content === nothing ? nothing : html`<div class="badge">${content}</div>`;
 }
 
 function extras(m: CardModel, ctx: RenderCtx): TemplateResult | typeof nothing {
@@ -164,10 +151,8 @@ export const flowStyles = css`
   .badge .label {
     font-size: 11px;
   }
-  .chips {
-    margin-bottom: 16px;
-  }
   .extras {
+    margin-top: 16px;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
