@@ -57,9 +57,9 @@ function extraTile(x: Extra, ctx: RenderCtx): TemplateResult {
 
 function filterTile(f: FilterView, ctx: RenderCtx): TemplateResult {
   const value = f.level === null ? f.label : `${String(f.level)}%`;
-  return html`<div class="tile tile--filter tile--${f.severity}">
+  return html`<div class="tile tile--filter">
     <span class="label"><ha-icon icon="mdi:air-filter"></ha-icon>${S.filter}</span>
-    ${tappable(f.entity, ctx, html`<span class="tile-value">${value}</span>`)}
+    ${tappable(f.entity, ctx, html`<span class="tile-value sev--${f.severity}">${value}</span>`)}
     ${f.level === null ? nothing : renderBar(f.level, SEVERITY_COLOR[f.severity])}
   </div>`;
 }
@@ -228,15 +228,6 @@ const wide = css`
   .tile-value {
     font-size: 18px;
     font-weight: 500;
-  }
-  .tile--ok .tile-value {
-    color: var(--hru-ok-text);
-  }
-  .tile--warning .tile-value {
-    color: var(--hru-warn-text);
-  }
-  .tile--critical .tile-value {
-    color: var(--hru-bad-text);
   }
   .tile .bar {
     height: 4px;

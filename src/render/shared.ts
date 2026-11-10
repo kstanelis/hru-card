@@ -55,13 +55,14 @@ export function renderHeader(
   opts: { compact?: boolean } = {},
 ): TemplateResult {
   const mode = m.mode;
-  return html`<div class=${classMap({ header: true, 'header--compact': opts.compact === true })}>
+  const compact = opts.compact === true;
+  return html`<div class=${classMap({ header: true, 'header--compact': compact })}>
     <div class="bubble">
       <ha-icon class="spin" data-motion="spin" icon=${m.icon}></ha-icon>
     </div>
     <div class="title">
       <div class="name">${m.name}</div>
-      ${m.subtitle ? html`<div class="subtitle">${m.subtitle}</div>` : nothing}
+      ${m.subtitle && !compact ? html`<div class="subtitle">${m.subtitle}</div>` : nothing}
     </div>
     ${
       mode
@@ -172,6 +173,7 @@ export const sharedStyles = css`
     margin-bottom: 16px;
   }
   .header--compact {
+    gap: 10px;
     margin-bottom: 12px;
   }
   .bubble {
@@ -187,9 +189,16 @@ export const sharedStyles = css`
     --mdc-icon-size: 22px;
   }
   .header--compact .bubble {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     --mdc-icon-size: 20px;
+  }
+  .header--compact .name {
+    font-size: 15px;
+  }
+  .header--compact .pill {
+    font-size: 12px;
+    padding: 5px 10px;
   }
   .spin {
     display: inline-flex;
@@ -265,6 +274,15 @@ export const sharedStyles = css`
   }
   .chip--critical {
     background: var(--hru-bad-tint);
+    color: var(--hru-bad-text);
+  }
+  .sev--ok {
+    color: var(--hru-ok-text);
+  }
+  .sev--warning {
+    color: var(--hru-warn-text);
+  }
+  .sev--critical {
     color: var(--hru-bad-text);
   }
   .label {

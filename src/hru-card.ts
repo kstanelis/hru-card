@@ -14,6 +14,7 @@ import { MotionController } from './motion';
 import { buildModel } from './model/build';
 import { flowStyles, renderFlow } from './render/flow';
 import { lanesStyles, renderLanes } from './render/lanes';
+import { compactStyles, renderCompact } from './render/compact';
 import { sharedStyles } from './render/shared';
 import { S } from './strings';
 import { themeVars } from './theme';
@@ -47,9 +48,10 @@ const CARD_SIZE: Record<Layout, number> = { flow: 6, lanes: 7, compact: 4 };
 type LayoutRenderer = (model: CardModel, ctx: RenderCtx) => TemplateResult;
 
 /** Layout renderers; each layout task registers its own. */
-const RENDERERS: Partial<Record<Layout, LayoutRenderer>> = {
+const RENDERERS: Record<Layout, LayoutRenderer> = {
   flow: renderFlow,
   lanes: renderLanes,
+  compact: renderCompact,
 };
 
 /** HA 2026.6+ card picker: suggest this card for an entity on an HRU-looking device. */
@@ -162,7 +164,7 @@ export class HruCard extends LitElement {
       ${
         model.tempCount < 2
           ? html`<div class="hint">${S.mapTwoTemps}</div>`
-          : (RENDERERS[config.layout]?.(model, this.ctx) ?? nothing)
+          : RENDERERS[config.layout](model, this.ctx)
       }
     </ha-card>`;
   }
@@ -177,6 +179,7 @@ export class HruCard extends LitElement {
     sharedStyles,
     flowStyles,
     lanesStyles,
+    compactStyles,
     css`
       :host {
         display: block;

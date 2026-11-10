@@ -35,7 +35,7 @@ describe('renderLanes', () => {
     expect(
       tile?.querySelector<HTMLElement>('.bar-fill')?.style.getPropertyValue('background'),
     ).toBe('var(--hru-warn)');
-    expect(tile?.classList.contains('tile--warning')).toBe(true);
+    expect(tile?.querySelector('.tile-value')?.classList.contains('sev--warning')).toBe(true);
     expect(text(tile?.querySelector('.tile-value') ?? null)).toBe('62%');
   });
 

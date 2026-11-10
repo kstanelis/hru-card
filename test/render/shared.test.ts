@@ -98,6 +98,12 @@ describe('renderHeader', () => {
     const plain = mount(renderHeader(model(), ctx()));
     expect(plain.querySelector('.header')?.classList.contains('header--compact')).toBe(false);
   });
+
+  it('compact variant omits the subtitle (hero and ring carry it)', () => {
+    const el = mount(renderHeader(model(), ctx(), { compact: true }));
+    expect(el.querySelector('.subtitle')).toBeNull();
+    expect(el.querySelector('.pill')).not.toBeNull();
+  });
 });
 
 describe('renderChips', () => {
