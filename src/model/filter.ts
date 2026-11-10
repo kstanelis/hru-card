@@ -1,15 +1,9 @@
 import { S } from '../strings';
-import type { HomeAssistant, HruCardConfig } from '../types';
+import type { FilterView, HomeAssistant, HruCardConfig } from '../types';
 import { readNumber, readState } from './read';
 
-export type FilterSeverity = 'ok' | 'warning' | 'critical';
-
-export interface FilterStatus {
-  entity: string;
-  level: number | null;
-  severity: FilterSeverity;
-  label: string;
-}
+export type FilterSeverity = FilterView['severity'];
+export type FilterStatus = FilterView;
 
 export const FILTER_WARNING = 50;
 export const FILTER_CRITICAL = 80;
