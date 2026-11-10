@@ -8,6 +8,7 @@ interface FakeAnimation {
   pause: ReturnType<typeof vi.fn>;
   play: ReturnType<typeof vi.fn>;
   cancel: ReturnType<typeof vi.fn>;
+  finished: Promise<unknown>;
 }
 
 let created: {
@@ -24,6 +25,7 @@ function fakeAnimate(this: Element, keyframes: Keyframe[], options: KeyframeAnim
     pause: vi.fn(),
     play: vi.fn(),
     cancel: vi.fn(),
+    finished: Promise.resolve(),
   };
   created.push({ el: this, keyframes, options, anim });
   return anim as unknown as Animation;

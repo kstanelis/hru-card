@@ -43,7 +43,7 @@ function sample(overrides: Record<string, string> = {}, extra: Partial<HomeAssis
 describe('buildModel', () => {
   it('builds sample', () => {
     const m = buildModel(sample(), CONFIG);
-    expect(m.recovery).toEqual({ value: 86, approx: true });
+    expect(m.recovery).toEqual({ value: 86, approx: true, entity: null });
     expect(m.subtitle).toBe('Normal mode · ≈86% heat recovery');
     expect(m.running).toBe(true);
     expect(m.stopped).toBeNull();
@@ -198,14 +198,14 @@ describe('buildModel', () => {
   it('efficiency sensor wins', () => {
     const hass = makeHass([...Object.values(sample().states), state('sensor.eff', '90.4')]);
     const m = buildModel(hass, { ...CONFIG, efficiency: 'sensor.eff' });
-    expect(m.recovery).toEqual({ value: 90, approx: false });
+    expect(m.recovery).toEqual({ value: 90, approx: false, entity: 'sensor.eff' });
     expect(m.subtitle).toBe('Normal mode · 90% heat recovery');
   });
 
   it('unavailable efficiency sensor falls back to computed', () => {
     const hass = makeHass([...Object.values(sample().states), state('sensor.eff', 'unknown')]);
     const m = buildModel(hass, { ...CONFIG, efficiency: 'sensor.eff' });
-    expect(m.recovery).toEqual({ value: 86, approx: true });
+    expect(m.recovery).toEqual({ value: 86, approx: true, entity: null });
   });
 
   it('computes recovery in °F', () => {
@@ -220,7 +220,7 @@ describe('buildModel', () => {
       supply_temp: 'sensor.s',
       extract_temp: 'sensor.e',
     });
-    expect(m.recovery).toEqual({ value: 85, approx: true });
+    expect(m.recovery).toEqual({ value: 85, approx: true, entity: null });
   });
 
   it('name from device via formatEntityName', () => {

@@ -128,6 +128,7 @@ export function renderBar(level: number | null, cssColorVar: string): TemplateRe
 
 export const sharedStyles = css`
   ha-card {
+    display: block;
     padding: 16px;
     border-radius: var(--ha-card-border-radius, 12px);
     background: var(--hru-card);
@@ -177,7 +178,7 @@ export const sharedStyles = css`
     font-size: 13px;
     color: var(--hru-muted);
   }
-  button.value {
+  :where(button.value) {
     all: unset;
     cursor: pointer;
     border-radius: 6px;
@@ -200,8 +201,10 @@ export const sharedStyles = css`
     flex-wrap: wrap;
     gap: 8px;
   }
-  button.chip {
+  :where(button.chip) {
     all: unset;
+  }
+  .chip {
     cursor: pointer;
     display: inline-flex;
     align-items: center;

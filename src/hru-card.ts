@@ -10,7 +10,10 @@ import {
   withDefaults,
   type ResolvedConfig,
 } from './config';
+import { MotionController } from './motion';
 import { buildModel } from './model/build';
+import { flowStyles, renderFlow } from './render/flow';
+import { sharedStyles } from './render/shared';
 import { S } from './strings';
 import { themeVars } from './theme';
 import type { CardModel, HomeAssistant, HruCardConfig, Layout, RenderCtx } from './types';
@@ -43,7 +46,7 @@ const CARD_SIZE: Record<Layout, number> = { flow: 6, lanes: 7, compact: 4 };
 type LayoutRenderer = (model: CardModel, ctx: RenderCtx) => TemplateResult;
 
 /** Layout renderers; each layout task registers its own. */
-const RENDERERS: Partial<Record<Layout, LayoutRenderer>> = {};
+const RENDERERS: Partial<Record<Layout, LayoutRenderer>> = { flow: renderFlow };
 
 /** HA 2026.6+ card picker: suggest this card for an entity on an HRU-looking device. */
 export function getEntitySuggestion(
@@ -65,6 +68,8 @@ export class HruCard extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @state() private config?: ResolvedConfig;
   private warned = new Set<string>();
+  private readonly motion = new MotionController(this);
+  private model?: CardModel;
 
   static getConfigElement(): HTMLElement {
     return document.createElement('hru-card-editor');
@@ -144,6 +149,7 @@ export class HruCard extends LitElement {
     const { config, hass } = this;
     if (!config || !hass) return nothing;
     const model = buildModel(hass, config);
+    this.model = model;
     const vars = themeVars(config.theme, config.accent, hass.themes?.darkMode ?? false);
     return html`<ha-card
       style=${styleMap(vars)}
@@ -157,22 +163,31 @@ export class HruCard extends LitElement {
     </ha-card>`;
   }
 
-  static override styles = css`
-    :host {
-      display: block;
-    }
-    ha-card {
-      background: var(--hru-card);
-      color: var(--hru-text);
-      border-radius: var(--ha-card-border-radius, 12px);
-      overflow: hidden;
-    }
-    .hint {
-      padding: 16px;
-      color: var(--hru-muted);
-      font-size: 14px;
-    }
-  `;
+  protected override updated(): void {
+    const { model, config, shadowRoot } = this;
+    if (!model || !config || !shadowRoot) return;
+    this.motion.sync(shadowRoot, model.motion, config.animations);
+  }
+
+  static override styles = [
+    sharedStyles,
+    flowStyles,
+    css`
+      :host {
+        display: block;
+      }
+      ha-card {
+        background: var(--hru-card);
+        color: var(--hru-text);
+        border-radius: var(--ha-card-border-radius, 12px);
+        overflow: hidden;
+      }
+      .hint {
+        color: var(--hru-muted);
+        font-size: 14px;
+      }
+    `,
+  ];
 }
 
 window.customCards = window.customCards ?? [];

@@ -117,7 +117,8 @@ export interface CardModel {
   tempCount: number;
   fans: { supply?: FanValue; extract?: FanValue };
   motion: Motion;
-  recovery: { value: number; approx: boolean } | null;
+  /** `entity` is the efficiency sensor when the value came from it, else null. */
+  recovery: { value: number; approx: boolean; entity: string | null } | null;
   filter: FilterView | null;
   chips: Chip[];
   extras: Extra[];
