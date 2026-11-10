@@ -54,6 +54,8 @@ export interface HomeAssistant {
     options?: { separator?: string },
   ) => string;
   themes?: { darkMode?: boolean };
+  /** Entity registry (subset). */
+  entities?: Record<string, { entity_id: string; device_id?: string | null }>;
 }
 
 export type TempKey = 'intake' | 'supply' | 'extract' | 'exhaust';

@@ -31,4 +31,7 @@ export const S = {
   humidity: 'Humidity',
   co2: 'CO₂',
   airflow: 'Air flow',
+  mapTwoTemps: 'Map at least two temperatures',
+  cardName: 'HRU Card',
+  cardDescription: 'Heat recovery ventilation card',
 } as const;
