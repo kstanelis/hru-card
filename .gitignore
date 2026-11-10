@@ -1,0 +1,6 @@
+.superpowers/
+.idea/
+node_modules/
+dist/
+coverage/
+docs/superpowers/
