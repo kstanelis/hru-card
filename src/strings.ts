@@ -8,4 +8,7 @@ export const S = {
   standby: 'Standby',
   defaultName: 'Ventilation',
   noValue: '—',
+  filterOk: 'Filter OK',
+  replaceFilter: 'Replace filter',
+  filterLevel: (v: string) => `Filter ${v}`,
 } as const;
