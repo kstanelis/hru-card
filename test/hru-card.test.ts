@@ -211,6 +211,12 @@ describe('hru-card element', () => {
     const Ctor = customElements.get('hru-card') as unknown as typeof HruCard;
     expect(Ctor.getConfigElement().tagName.toLowerCase()).toBe('hru-card-editor');
   });
+
+  it('registers the editor element with the card bundle', () => {
+    const editor = customElements.get('hru-card-editor');
+    expect(editor).toBeDefined();
+    expect(Object.getOwnPropertyNames(editor?.prototype ?? {})).toContain('setConfig');
+  });
 });
 
 const HRU_DEVICE: HassEntity[] = [

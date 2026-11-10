@@ -10,6 +10,7 @@ import {
   withDefaults,
   type ResolvedConfig,
 } from './config';
+import './editor';
 import { MotionController } from './motion';
 import { buildModel } from './model/build';
 import { flowStyles, renderFlow } from './render/flow';
