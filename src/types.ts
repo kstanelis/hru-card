@@ -47,5 +47,81 @@ export interface HomeAssistant {
   locale?: { language: string };
   language?: string;
   formatEntityState?: (entity: HassEntity, state?: string) => string;
+  /** HA 2026.4+: compose a display name from registry context. */
+  formatEntityName?: (
+    entity: HassEntity,
+    items: { type: 'entity' | 'device' | 'area' | 'floor' }[],
+    options?: { separator?: string },
+  ) => string;
   themes?: { darkMode?: boolean };
+}
+
+export type TempKey = 'intake' | 'supply' | 'extract' | 'exhaust';
+
+export interface TempValue {
+  key: TempKey;
+  entity: string;
+  value: number | null;
+  display: string;
+  label: string;
+}
+
+export interface FanValue {
+  entity: string;
+  level: number | null;
+  display: string;
+  rpm: string | null;
+}
+
+export interface Chip {
+  kind: 'bypass' | 'heater' | 'defrost';
+  entity: string;
+  active: boolean;
+  icon: string;
+  label: string;
+}
+
+export type ExtraKey = 'recovered_power' | 'power' | 'humidity' | 'co2' | 'airflow';
+
+export interface Extra {
+  key: ExtraKey;
+  entity: string;
+  label: string;
+  display: string;
+}
+
+export interface FilterView {
+  entity: string;
+  level: number | null;
+  severity: 'ok' | 'warning' | 'critical';
+  label: string;
+}
+
+/** Seconds per animation cycle; null = paused. */
+export interface Motion {
+  supply: number | null;
+  extract: number | null;
+  spin: number | null;
+}
+
+export interface CardModel {
+  name: string;
+  icon: string;
+  subtitle: string;
+  mode: { entity: string; label: string } | null;
+  running: boolean;
+  stopped: { label: string; icon: string } | null;
+  temps: Partial<Record<TempKey, TempValue>>;
+  tempCount: number;
+  fans: { supply?: FanValue; extract?: FanValue };
+  motion: Motion;
+  recovery: { value: number; approx: boolean } | null;
+  filter: FilterView | null;
+  chips: Chip[];
+  extras: Extra[];
+  hero: { key: TempKey; label: string; display: string; sub: string | null } | null;
+}
+
+export interface RenderCtx {
+  moreInfo: (entityId: string) => void;
 }
