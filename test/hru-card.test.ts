@@ -136,6 +136,12 @@ describe('hru-card element', () => {
     expect(el.shadowRoot?.querySelector('ha-card .diagram')).toBeNull();
   });
 
+  it('renders the compact layout', async () => {
+    const el = await mount({ ...CONFIG, layout: 'compact' });
+    expect(el.shadowRoot?.querySelector('ha-card .header--compact')).not.toBeNull();
+    expect(el.shadowRoot?.querySelector('ha-card .strip')).not.toBeNull();
+  });
+
   it('syncs motion with the model after each render', async () => {
     const sync = vi.spyOn(MotionController.prototype, 'sync').mockImplementation(() => undefined);
     const el = await mount();

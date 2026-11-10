@@ -1,3 +1,5 @@
+import type { ExtraKey } from './types';
+
 export const S = {
   intake: 'Intake',
   supply: 'Supply',
@@ -24,6 +26,14 @@ export const S = {
   freshAirIn: 'fresh air in',
   staleAirOut: 'stale air out',
   filter: 'Filter',
+  filterClogging: 'Filter clogging',
+  supplyFan: 'Supply fan',
+  extractFan: 'Extract fan',
+  ringLabel: (v: number) => `Heat recovery ${String(v)} percent`,
+  /** Word appended to an extra's value in the compact line, where no label is shown. */
+  extraSuffix: { recovered_power: 'recovered', humidity: 'RH' } as Partial<
+    Record<ExtraKey, string>
+  >,
   bypassOpen: 'Bypass open',
   bypassClosed: 'Bypass closed',
   heaterOn: 'Heater on',
