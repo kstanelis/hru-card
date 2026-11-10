@@ -1,5 +1,5 @@
 import type { HomeAssistant } from '../types';
-import { readState } from './read';
+import { parseNumber, readState } from './read';
 
 const clamp = (n: number): number => Math.min(100, Math.max(0, n));
 
@@ -18,8 +18,8 @@ export function fanLevel(
     if (typeof pct !== 'number') return null;
     raw = pct;
   } else {
-    const n = parseFloat(entity.state);
-    if (Number.isNaN(n)) return null;
+    const n = parseNumber(entity.state);
+    if (n === null) return null;
     raw = entity.attributes.unit_of_measurement === 'rpm' ? (n / maxRpm) * 100 : n;
   }
   return Math.round(clamp(raw));

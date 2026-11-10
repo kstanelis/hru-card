@@ -11,6 +11,7 @@ describe('fanLevel', () => {
     state('sensor.over', '130', { unit_of_measurement: '%' }),
     state('sensor.frac', '44.6', { unit_of_measurement: '%' }),
     state('sensor.bad', 'abc', { unit_of_measurement: '%' }),
+    state('sensor.partial', '40abc', { unit_of_measurement: '%' }),
     state('sensor.un', 'unavailable', { unit_of_measurement: '%' }),
     state('fan.x', 'on', { percentage: 70 }),
     state('fan.off', 'off', { percentage: null }),
@@ -48,5 +49,6 @@ describe('fanLevel', () => {
     expect(fanLevel(hass, 'sensor.nope')).toBeNull();
     expect(fanLevel(hass, undefined)).toBeNull();
     expect(fanLevel(hass, 'sensor.bad')).toBeNull();
+    expect(fanLevel(hass, 'sensor.partial')).toBeNull();
   });
 });
