@@ -1,6 +1,13 @@
 import { FILTER_CRITICAL, FILTER_WARNING } from './model/filter';
 import { S } from './strings';
-import type { HruCardConfig, Layout, SpeedBand, ThemeMode } from './types';
+import type {
+  HassEntity,
+  HomeAssistant,
+  HruCardConfig,
+  Layout,
+  SpeedBand,
+  ThemeMode,
+} from './types';
 
 export const LAYOUTS: readonly Layout[] = ['flow', 'lanes', 'compact'];
 export const THEMES: readonly ThemeMode[] = ['auto', 'light', 'dark'];
@@ -161,7 +168,7 @@ export function validateConfig(c: unknown): ValidationResult {
     }
   }
 
-  if (TEMP_ROLES.filter((r) => isSet(cfg[r])).length < 2) {
+  if (countTemps(cfg) < 2) {
     warnings.push(`map at least two of ${TEMP_ROLES.join(', ')}`);
   }
 
@@ -175,4 +182,69 @@ export type ResolvedConfig = HruCardConfig & {
 export function withDefaults(c: HruCardConfig): ResolvedConfig {
   const set = Object.fromEntries(Object.entries(c).filter(([, v]) => isSet(v)));
   return { ...DEFAULTS, ...set } as ResolvedConfig;
+}
+
+const TEMP_UNITS = new Set(['°C', '°F', 'K']);
+const ROLE_WORDS: [EntityRole, string[]][] = [
+  ['intake_temp', ['intake', 'outdoor', 'outside', 'fresh']],
+  ['supply_temp', ['supply']],
+  ['extract_temp', ['extract', 'return']],
+  ['exhaust_temp', ['exhaust']],
+  ['supply_fan', ['supply']],
+  ['extract_fan', ['extract', 'return']],
+  ['mode', ['mode']],
+];
+
+function words(e: HassEntity): Set<string> {
+  const friendly = typeof e.attributes.friendly_name === 'string' ? e.attributes.friendly_name : '';
+  return new Set(
+    `${e.entity_id.split('.')[1] ?? ''} ${friendly}`.toLowerCase().split(/[^a-z0-9]+/),
+  );
+}
+
+function fits(role: EntityRole, e: HassEntity, w: Set<string>): boolean {
+  const domain = e.entity_id.split('.')[0];
+  const unit = e.attributes.unit_of_measurement;
+  if (role.endsWith('_temp')) {
+    return (
+      domain === 'sensor' &&
+      (e.attributes.device_class === 'temperature' ||
+        (typeof unit === 'string' && TEMP_UNITS.has(unit)))
+    );
+  }
+  if (role.endsWith('_fan')) {
+    if (domain === 'fan') return true;
+    return (
+      (domain === 'sensor' || domain === 'number') &&
+      (unit === '%' || unit === 'rpm') &&
+      w.has('fan')
+    );
+  }
+  return domain === 'select' || domain === 'input_select';
+}
+
+/**
+ * Guess role mapping from entity ids and friendly names using generic words only
+ * (intake/outdoor/supply/extract/exhaust/fan/mode). Each entity fills at most one role.
+ */
+export function matchRoles(hass: HomeAssistant, entityIds: string[]): Partial<HruCardConfig> {
+  const out: Partial<Record<EntityRole, string>> = {};
+  const used = new Set<string>();
+  for (const [role, roleWords] of ROLE_WORDS) {
+    for (const id of entityIds) {
+      const e = hass.states[id] as HassEntity | undefined;
+      if (!e || used.has(id)) continue;
+      const w = words(e);
+      if (roleWords.some((rw) => w.has(rw)) && fits(role, e, w)) {
+        out[role] = id;
+        used.add(id);
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+export function countTemps(c: Partial<HruCardConfig>): number {
+  return TEMP_ROLES.filter((r) => isSet(c[r])).length;
 }

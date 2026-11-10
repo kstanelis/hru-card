@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HRU card preview</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: Roboto, system-ui, sans-serif;
+        background: var(--primary-background-color);
+        color: var(--primary-text-color);
+      }
+      body.dark {
+        --primary-background-color: #111318;
+        --card-background-color: #1c1c1e;
+        --primary-text-color: #e1e1e1;
+        --secondary-text-color: #9b9b9f;
+        --divider-color: #2a2a2e;
+      }
+      body.light {
+        --primary-background-color: #eef0f3;
+        --card-background-color: #ffffff;
+        --primary-text-color: #1c1c1e;
+        --secondary-text-color: #5f6368;
+        --divider-color: #e0e2e6;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 520px));
+        gap: 16px;
+      }
+      ha-card {
+        display: block;
+      }
+    </style>
+  </head>
+  <body class="dark">
+    <div class="controls" id="controls"></div>
+    <div class="cards" id="cards"></div>
+    <script type="module">
+      // Minimal stand-ins for HA elements so the card renders outside Home Assistant.
+      customElements.define('ha-card', class extends HTMLElement {});
+      customElements.define(
+        'ha-icon',
+        class extends HTMLElement {
+          static observedAttributes = ['icon'];
+          attributeChangedCallback() {
+            this.textContent = '◉';
+            this.title = this.getAttribute('icon') ?? '';
+          }
+        },
+      );
+      import('../dist/hru-card.js').then(async () => {
+        const { makeHass, values, config } = await import('./fake-hass.js');
+        const cards = ['flow', 'lanes', 'compact'].map((layout) => {
+          const el = document.createElement('hru-card');
+          el.setConfig({ ...config, layout });
+          document.getElementById('cards').append(el);
+          return el;
+        });
+        const update = () => {
+          document.body.className = values.dark ? 'dark' : 'light';
+          for (const c of cards) c.hass = makeHass(values);
+        };
+        const controls = document.getElementById('controls');
+        const button = (label, fn) => {
+          const b = document.createElement('button');
+          b.textContent = label;
+          b.onclick = () => {
+            fn();
+            update();
+          };
+          controls.append(b);
+        };
+        const presets = { Away: 20, Normal: 45, Intensive: 70, Boost: 100, Standby: 0, Off: 0 };
+        for (const [mode, fan] of Object.entries(presets)) {
+          button(mode, () => Object.assign(values, { mode, supplyFan: fan, extractFan: fan }));
+        }
+        button('Heater', () => (values.heater = values.heater === 'on' ? 'off' : 'on'));
+        button('Bypass', () => (values.bypass = values.bypass === 'on' ? 'off' : 'on'));
+        button('Defrost', () => (values.defrost = values.defrost === 'on' ? 'off' : 'on'));
+        button('Filter +15%', () => (values.filter = (values.filter + 15) % 105));
+        button('Theme', () => (values.dark = !values.dark));
+        document.body.addEventListener('hass-more-info', (e) =>
+          console.log('more-info', e.detail.entityId),
+        );
+        update();
+      });
+    </script>
+  </body>
+</html>
