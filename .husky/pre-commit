@@ -1,1 +1,2 @@
+npm run audit
 npx lint-staged && npm run typecheck && npm run lit:analyze

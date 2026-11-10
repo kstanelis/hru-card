@@ -30,6 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit dependencies (moderate and above block)
+        run: npm run audit
+
+      - name: Verify registry signatures
+        run: npm audit signatures
+
       - name: Lint
         run: npm run lint
 
