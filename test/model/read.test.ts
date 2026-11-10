@@ -3,7 +3,7 @@ import { formatTemp, formatValue, readNumber, readOnOff, readState } from '../..
 import { makeHass, state } from '../helpers';
 
 describe('readState', () => {
-  const hass = makeHass([state('sensor.a', '1'), state('sensor.u', 'unavailable')]);
+  const hass = makeHass([state('sensor.a', '1')]);
   it('returns null for empty or undefined id', () => {
     expect(readState(hass, '')).toBeNull();
     expect(readState(hass)).toBeNull();
@@ -35,6 +35,16 @@ describe('readNumber', () => {
   it('parses "4.0"', () => {
     expect(readNumber(hass, 'sensor.t')).toBe(4);
   });
+  it.each([['12abc'], [''], ['  '], ['Infinity'], ['-Infinity'], ['NaN'], ['0x10']])(
+    'rejects partly numeric or non-finite %j',
+    (value) => {
+      expect(readNumber(makeHass([state('sensor.x', value)]), 'sensor.x')).toBeNull();
+    },
+  );
+  it('accepts surrounding whitespace, sign and exponent', () => {
+    expect(readNumber(makeHass([state('sensor.x', ' -2.5 ')]), 'sensor.x')).toBe(-2.5);
+    expect(readNumber(makeHass([state('sensor.x', '1e3')]), 'sensor.x')).toBe(1000);
+  });
 });
 
 describe('readOnOff', () => {
@@ -51,6 +61,8 @@ describe('readOnOff', () => {
     ['0', false],
     ['12.5', true],
     ['foo', null],
+    ['1abc', null],
+    ['Infinity', null],
   ])('maps %s to %s', (value, expected) => {
     const hass = makeHass([state('x.y', value)]);
     expect(readOnOff(hass, 'x.y')).toBe(expected);
@@ -73,6 +85,14 @@ describe('formatTemp', () => {
   it('returns dash for null', () => {
     expect(formatTemp(makeHass([]), null)).toBe('—');
   });
+  it('returns dash for non-finite values', () => {
+    expect(formatTemp(makeHass([]), Number.NaN)).toBe('—');
+    expect(formatTemp(makeHass([]), Infinity)).toBe('—');
+  });
+  it('falls back to en for an empty or malformed locale', () => {
+    expect(formatTemp(makeHass([], { locale: { language: '' } }), 4)).toBe('4.0°');
+    expect(formatTemp(makeHass([], { language: 'not a locale!' }), 4)).toBe('4.0°');
+  });
 });
 
 describe('formatValue', () => {
@@ -90,6 +110,20 @@ describe('formatValue', () => {
   it('limits fallback to one decimal', () => {
     const hass = makeHass([state('sensor.p', '48.26', { unit_of_measurement: '%' })]);
     expect(formatValue(hass, 'sensor.p')).toBe('48.3 %');
+  });
+  it('fallback number follows the locale', () => {
+    const hass = makeHass([state('sensor.p', '48.26', { unit_of_measurement: 'W' })], {
+      locale: { language: 'de' },
+    });
+    expect(formatValue(hass, 'sensor.p')).toBe('48,3 W');
+  });
+  it('fallback does not group thousands', () => {
+    const hass = makeHass([state('sensor.r', '1320', { unit_of_measurement: 'rpm' })]);
+    expect(formatValue(hass, 'sensor.r')).toBe('1320 rpm');
+  });
+  it('fallback keeps raw state for partly numeric values', () => {
+    const hass = makeHass([state('sensor.p', '12abc', { unit_of_measurement: 'W' })]);
+    expect(formatValue(hass, 'sensor.p')).toBe('12abc');
   });
   it('omits unit when absent', () => {
     const hass = makeHass([state('sensor.p', '48')]);

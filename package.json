@@ -16,7 +16,7 @@
     "lit:analyze": "lit-analyzer src --strict --maxWarnings 0 --rules.no-unknown-tag-name off",
     "check": "npm run audit && npm run lint && npm run format:check && npm run typecheck && npm run lit:analyze && npm run test:coverage",
     "prepare": "husky",
-    "audit": "npm audit --audit-level=moderate"
+    "audit": "npm audit --audit-level=low"
   },
   "lint-staged": {
     "*.ts": [
@@ -52,6 +52,9 @@
   "overrides": {
     "@typescript-eslint/typescript-estree": {
       "minimatch": "^11.0.6"
+    },
+    "@rollup/plugin-node-resolve": {
+      "deepmerge": "4.1.2"
     }
   }
 }
