@@ -130,6 +130,12 @@ describe('hru-card element', () => {
     expect(el.shadowRoot?.querySelector('ha-card .header')).not.toBeNull();
   });
 
+  it('renders the lanes layout', async () => {
+    const el = await mount({ ...CONFIG, layout: 'lanes' });
+    expect(el.shadowRoot?.querySelector('ha-card .lanes-grid')).not.toBeNull();
+    expect(el.shadowRoot?.querySelector('ha-card .diagram')).toBeNull();
+  });
+
   it('syncs motion with the model after each render', async () => {
     const sync = vi.spyOn(MotionController.prototype, 'sync').mockImplementation(() => undefined);
     const el = await mount();

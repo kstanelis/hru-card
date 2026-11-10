@@ -13,6 +13,7 @@ import {
 import { MotionController } from './motion';
 import { buildModel } from './model/build';
 import { flowStyles, renderFlow } from './render/flow';
+import { lanesStyles, renderLanes } from './render/lanes';
 import { sharedStyles } from './render/shared';
 import { S } from './strings';
 import { themeVars } from './theme';
@@ -46,7 +47,10 @@ const CARD_SIZE: Record<Layout, number> = { flow: 6, lanes: 7, compact: 4 };
 type LayoutRenderer = (model: CardModel, ctx: RenderCtx) => TemplateResult;
 
 /** Layout renderers; each layout task registers its own. */
-const RENDERERS: Partial<Record<Layout, LayoutRenderer>> = { flow: renderFlow };
+const RENDERERS: Partial<Record<Layout, LayoutRenderer>> = {
+  flow: renderFlow,
+  lanes: renderLanes,
+};
 
 /** HA 2026.6+ card picker: suggest this card for an entity on an HRU-looking device. */
 export function getEntitySuggestion(
@@ -172,6 +176,7 @@ export class HruCard extends LitElement {
   static override styles = [
     sharedStyles,
     flowStyles,
+    lanesStyles,
     css`
       :host {
         display: block;

@@ -2,9 +2,17 @@ import { css, html, nothing, type TemplateResult } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import type { CardModel, Chip, RenderCtx } from '../types';
+import { S } from '../strings';
+import type { CardModel, Chip, FilterView, RenderCtx, TempKey } from '../types';
 
 const FILTER_ICON = 'mdi:air-filter';
+
+/** Bar colour token per filter severity. */
+export const SEVERITY_COLOR: Record<FilterView['severity'], string> = {
+  ok: '--hru-ok',
+  warning: '--hru-warn',
+  critical: '--hru-bad',
+};
 
 /** Any entity-backed value: a reset button that opens the entity's more-info dialog. */
 export function tappable(entity: string, ctx: RenderCtx, content: TemplateResult): TemplateResult {
@@ -17,6 +25,28 @@ export function tappable(entity: string, ctx: RenderCtx, content: TemplateResult
   >
     ${content}
   </button>`;
+}
+
+/** A temperature value: tappable when mapped, a plain dash when the role is unmapped. */
+export function renderTemp(m: CardModel, key: TempKey, ctx: RenderCtx): TemplateResult {
+  const t = m.temps[key];
+  return t
+    ? tappable(t.entity, ctx, html`<span class="temp">${t.display}</span>`)
+    : html`<span class="temp">${S.noValue}</span>`;
+}
+
+/** Recovery spot: stopped state, or percentage + label (tappable when from a sensor). */
+export function renderRecovery(
+  m: CardModel,
+  ctx: RenderCtx,
+  stoppedIconSize: number,
+): TemplateResult | typeof nothing {
+  if (m.stopped) return renderStopped(m, stoppedIconSize);
+  const r = m.recovery;
+  if (!r) return nothing;
+  const pct = html`<span class="pct">${r.approx ? '≈' : ''}${String(r.value)}%</span>`;
+  return html`${r.entity ? tappable(r.entity, ctx, pct) : pct}
+    <span class="label">${S.recovery}</span>`;
 }
 
 export function renderHeader(
@@ -154,6 +184,7 @@ export const sharedStyles = css`
     border-radius: 50%;
     background: var(--hru-accent-tint);
     color: var(--hru-accent-text);
+    --mdc-icon-size: 22px;
   }
   .header--compact .bubble {
     width: 32px;
