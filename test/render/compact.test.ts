@@ -32,12 +32,30 @@ describe('renderCompact', () => {
     expect(text(el.querySelector('.hero-sub'))).toBe('from 4.0° intake');
   });
 
-  it('hero without sub and without hero', () => {
-    const { el } = mount(
-      cardModel({ hero: { key: 'extract', label: 'Extract air', display: '22.0°', sub: null } }),
-    );
+  it('hero without sub', () => {
+    const { el } = mount(cardModel({ hero: { label: 'Supply air', display: '19.5°', sub: null } }));
     expect(el.querySelector('.hero-sub')).toBeNull();
-    expect(mount(cardModel({ hero: null })).el.querySelector('.hero')).toBeNull();
+  });
+
+  it('target line under the hero opens the target entity', () => {
+    const { el, moreInfo } = mount(
+      cardModel({
+        hero: {
+          label: 'Supply air',
+          display: '19.5°',
+          sub: { text: 'target 21.0°', entity: 'sensor.target' },
+        },
+      }),
+    );
+    const btn = el.querySelector<HTMLButtonElement>('.hero-sub')?.closest('button');
+    expect(text(el.querySelector('.hero-sub'))).toBe('target 21.0°');
+    btn?.click();
+    expect(moreInfo).toHaveBeenCalledWith('sensor.target');
+  });
+
+  it('"from intake" line is plain text', () => {
+    const { el } = mount(cardModel());
+    expect(el.querySelector('.hero-sub')?.closest('button')).toBeNull();
   });
 
   it('hero value opens more-info for its temperature', () => {
@@ -125,12 +143,13 @@ describe('renderCompact', () => {
     expect(mount(m).el.querySelector('.meters')).toBeNull();
   });
 
-  it('hero for an unmapped temperature is plain text', () => {
-    const m = cardModel();
+  it('hero without supply is only a plain —, no label', () => {
+    const m = cardModel({ hero: { label: null, display: '—', sub: null } });
     delete m.temps.supply;
     const { el } = mount(m);
     expect(el.querySelector('.hero button.value')).toBeNull();
-    expect(text(el.querySelector('.hero-value'))).toBe('19.5°');
+    expect(el.querySelector('.hero-label')).toBeNull();
+    expect(text(el.querySelector('.hero'))).toBe('—');
   });
 
   it('fans without a filter show only fan meters', () => {

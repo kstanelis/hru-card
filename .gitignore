@@ -5,3 +5,5 @@ dist/
 coverage/
 example-erhv-locelace/
 docs/superpowers/
+CLAUDE.md
+.claude/

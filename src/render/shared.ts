@@ -49,6 +49,16 @@ export function renderRecovery(
     <span class="label">${S.recovery}</span>`;
 }
 
+/** Small "Target 21.0°" line; nothing when `target_temp` is not mapped. */
+export function renderTarget(m: CardModel, ctx: RenderCtx): TemplateResult | typeof nothing {
+  const t = m.target;
+  if (!t) return nothing;
+  return html`<div class="target">
+    <span>${S.target}</span>
+    ${tappable(t.entity, ctx, html`<span class="target-value">${t.display}</span>`)}
+  </div>`;
+}
+
 export function renderHeader(
   m: CardModel,
   ctx: RenderCtx,
@@ -288,6 +298,18 @@ export const sharedStyles = css`
   .label {
     font-size: 12px;
     color: var(--hru-muted);
+  }
+  .target {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--hru-muted);
+  }
+  .target-value {
+    font-weight: 500;
+    color: var(--hru-text);
   }
   .stopped {
     display: flex;
