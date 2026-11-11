@@ -1,6 +1,6 @@
 {
   "name": "hru-card",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Home Assistant Lovelace card for heat recovery units",
   "private": true,
   "type": "module",
