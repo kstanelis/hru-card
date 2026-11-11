@@ -16,6 +16,8 @@ state. It never sends commands to your unit; tapping a value opens its more-info
   - `compact`: hero temperature with a recovery ring.
 - **Motion with meaning:** air and fan speed follow the unit's mode. Everything stops when the unit
   is off or in standby. The `prefers-reduced-motion` setting is respected.
+- **Quiet header:** no subtitle while running. Flow and lanes show a short one when the unit is
+  off or in standby (e.g. "Unit off · no airflow").
 - **Native look:** follows your HA theme, light and dark, and your accent colour.
 - **Visual editor:** entity pickers filtered to fitting domains and a short explanation under every field, so no YAML is needed.
 - **Card picker suggestions (HA 2026.6+):** when you pick a temperature sensor of a ventilation

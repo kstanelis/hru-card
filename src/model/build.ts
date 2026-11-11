@@ -155,17 +155,9 @@ export function buildModel(hass: HomeAssistant, config: HruCardConfig): CardMode
         ? { value: computed, approx: true, entity: null }
         : null;
 
-  let subtitle: string;
-  if (stopped) {
-    subtitle = isStandby ? S.standbySubtitle : S.offSubtitle;
-  } else {
-    const parts: string[] = [];
-    if (mode) parts.push(S.modeSuffix(mode.label));
-    if (recovery) {
-      parts.push(S.heatRecovery(`${recovery.approx ? '≈' : ''}${String(recovery.value)}%`));
-    }
-    subtitle = parts.length ? parts.join(S.separator) : S.heatRecoveryActive;
-  }
+  // No subtitle while running (owner decision); only stopped states get one.
+  const canStop = [config.mode, config.supply_fan, config.extract_fan].some(Boolean);
+  const subtitle = stopped ? (isStandby ? S.standbySubtitle : S.offSubtitle) : canStop ? '' : null;
 
   const chips: Chip[] = [];
   for (const def of CHIP_DEFS) {
