@@ -44,7 +44,7 @@ describe('buildModel', () => {
   it('builds sample', () => {
     const m = buildModel(sample(), CONFIG);
     expect(m.recovery).toEqual({ value: 86, approx: true, entity: null });
-    expect(m.subtitle).toBe('Normal mode · ≈86% heat recovery');
+    expect(m.subtitle).toBe('');
     expect(m.running).toBe(true);
     expect(m.stopped).toBeNull();
     expect(m.motion.supply).toBeCloseTo(1.83);
@@ -111,7 +111,7 @@ describe('buildModel', () => {
       CONFIG,
     );
     expect(m.motion.spin).toBe(0.6);
-    expect(m.subtitle).toBe('Quirky mode · ≈86% heat recovery');
+    expect(m.mode?.label).toBe('Quirky');
   });
 
   it('mode_speeds override applies', () => {
@@ -141,16 +141,17 @@ describe('buildModel', () => {
     const m = buildModel(sample(), cfg);
     expect(m.mode).toBeNull();
     expect(m.motion.spin).toBe(2.4);
-    expect(m.subtitle).toBe('≈86% heat recovery');
+    // Fans alone can stop the unit, so the line is reserved.
+    expect(m.subtitle).toBe('');
   });
 
-  it('subtitle fallback when nothing known', () => {
+  it('no subtitle row at all when the unit can never stop (no mode or fans)', () => {
     const m = buildModel(sample(), {
       type: 'custom:hru-card',
       intake_temp: 'sensor.intake',
       exhaust_temp: 'sensor.exhaust',
     });
-    expect(m.subtitle).toBe('Heat recovery active');
+    expect(m.subtitle).toBeNull();
     expect(m.recovery).toBeNull();
   });
 
@@ -204,7 +205,7 @@ describe('buildModel', () => {
     const hass = makeHass([...Object.values(sample().states), state('sensor.eff', '90.4')]);
     const m = buildModel(hass, { ...CONFIG, efficiency: 'sensor.eff' });
     expect(m.recovery).toEqual({ value: 90, approx: false, entity: 'sensor.eff' });
-    expect(m.subtitle).toBe('Normal mode · 90% heat recovery');
+    expect(m.subtitle).toBe('');
   });
 
   it('unavailable efficiency sensor falls back to computed', () => {

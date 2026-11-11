@@ -13,7 +13,7 @@ function model(over: Partial<CardModel> = {}): CardModel {
   return {
     name: 'Ventilation',
     icon: 'mdi:fan',
-    subtitle: 'Normal mode',
+    subtitle: '',
     mode: { entity: 'select.mode', label: 'Normal' },
     running: true,
     stopped: null,
@@ -70,14 +70,36 @@ const filter = (level: number, severity: FilterView['severity']): FilterView => 
 });
 
 describe('renderHeader', () => {
-  it('shows icon in a spin target, name, subtitle and mode pill', () => {
+  it('running: icon in a spin target, name and mode pill, empty subtitle line', () => {
     const el = mount(renderHeader(model(), ctx()));
     const icon = el.querySelector('ha-icon.spin');
     expect(icon?.getAttribute('icon')).toBe('mdi:fan');
     expect(icon?.getAttribute('data-motion')).toBe('spin');
     expect(el.querySelector('.name')?.textContent).toBe('Ventilation');
-    expect(el.querySelector('.subtitle')?.textContent).toBe('Normal mode');
+    // Empty line stays in the DOM; CSS min-height keeps the header height on start/stop.
+    expect(el.querySelector('.subtitle')?.textContent).toBe('');
     expect(el.querySelector('.pill')?.textContent.trim()).toBe('Normal');
+  });
+
+  it('stopped: shows the stopped subtitle', () => {
+    const el = mount(
+      renderHeader(
+        model({
+          running: false,
+          stopped: { label: 'Unit off', icon: 'mdi:power' },
+          subtitle: 'Unit off · no airflow',
+          mode: { entity: 'select.mode', label: 'Off' },
+        }),
+        ctx(),
+      ),
+    );
+    const line = el.querySelector('.subtitle');
+    expect(line?.textContent).toBe('Unit off · no airflow');
+  });
+
+  it('no subtitle row when the unit can never stop', () => {
+    const el = mount(renderHeader(model({ subtitle: null }), ctx()));
+    expect(el.querySelector('.subtitle')).toBeNull();
   });
 
   it('mode pill opens more-info for the mode entity', () => {
@@ -87,10 +109,9 @@ describe('renderHeader', () => {
     expect(c.moreInfo).toHaveBeenCalledWith('select.mode');
   });
 
-  it('omits pill and subtitle when not available', () => {
-    const el = mount(renderHeader(model({ mode: null, subtitle: '' }), ctx()));
+  it('omits the pill when mode is not available', () => {
+    const el = mount(renderHeader(model({ mode: null }), ctx()));
     expect(el.querySelector('.pill')).toBeNull();
-    expect(el.querySelector('.subtitle')).toBeNull();
   });
 
   it('compact variant adds header--compact class', () => {
@@ -101,7 +122,9 @@ describe('renderHeader', () => {
   });
 
   it('compact variant omits the subtitle (hero and ring carry it)', () => {
-    const el = mount(renderHeader(model(), ctx(), { compact: true }));
+    const el = mount(
+      renderHeader(model({ subtitle: 'Unit off · no airflow' }), ctx(), { compact: true }),
+    );
     expect(el.querySelector('.subtitle')).toBeNull();
     expect(el.querySelector('.pill')).not.toBeNull();
   });

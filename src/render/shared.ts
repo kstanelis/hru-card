@@ -59,6 +59,15 @@ export function renderTarget(m: CardModel, ctx: RenderCtx): TemplateResult | typ
   </div>`;
 }
 
+/**
+ * Subtitle line (flow, lanes). '' while running still renders the line: its CSS min-height keeps
+ * the header height steady on start/stop. null (unit can never stop) or compact: no line.
+ */
+function renderSubtitle(m: CardModel, compact: boolean): TemplateResult | typeof nothing {
+  if (compact || m.subtitle === null) return nothing;
+  return html`<div class="subtitle">${m.subtitle}</div>`;
+}
+
 export function renderHeader(
   m: CardModel,
   ctx: RenderCtx,
@@ -72,7 +81,7 @@ export function renderHeader(
     </div>
     <div class="title">
       <div class="name">${m.name}</div>
-      ${m.subtitle && !compact ? html`<div class="subtitle">${m.subtitle}</div>` : nothing}
+      ${renderSubtitle(m, compact)}
     </div>
     ${
       mode
@@ -226,7 +235,12 @@ export const sharedStyles = css`
   }
   .subtitle {
     font-size: 13px;
+    line-height: 18px;
+    min-height: 18px;
     color: var(--hru-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   :where(button.value) {
     all: unset;

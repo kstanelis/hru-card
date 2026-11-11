@@ -110,7 +110,11 @@ export interface Motion {
 export interface CardModel {
   name: string;
   icon: string;
-  subtitle: string;
+  /**
+   * Stopped-state text; '' while running (line kept so the header does not jump);
+   * null when the unit can never stop (no mode or fans mapped), so no line at all.
+   */
+  subtitle: string | null;
   mode: { entity: string; label: string } | null;
   running: boolean;
   stopped: { label: string; icon: string } | null;

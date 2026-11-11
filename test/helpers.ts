@@ -32,7 +32,7 @@ export function cardModel(over: Partial<CardModel> = {}): CardModel {
   return {
     name: 'Ventilation',
     icon: 'mdi:fan',
-    subtitle: 'Normal mode · ≈86% heat recovery',
+    subtitle: '',
     mode: { entity: 'select.mode', label: 'Normal' },
     running: true,
     stopped: null,
