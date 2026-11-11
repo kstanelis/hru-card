@@ -1,0 +1,123 @@
+# Demo entities for testing HRU Card in a real Home Assistant (no ventilation unit needed).
+# Copy into configuration.yaml (or a package), restart, then add the card with the YAML at the end.
+# Change the inputs in the UI to drive the card: mode, fans, filter, bypass/heater/defrost.
+
+input_select:
+  demo_hru_mode:
+    name: Demo HRU mode
+    options: [Away, Normal, Intensive, Boost, Standby, 'Off']
+    initial: Normal
+
+input_number:
+  demo_hru_outdoor:
+    name: Demo outdoor temperature
+    min: -25
+    max: 35
+    step: 0.5
+    initial: 4
+    unit_of_measurement: '°C'
+  demo_hru_supply_fan:
+    name: Demo supply fan
+    min: 0
+    max: 100
+    step: 1
+    initial: 45
+    unit_of_measurement: '%'
+  demo_hru_extract_fan:
+    name: Demo extract fan
+    min: 0
+    max: 100
+    step: 1
+    initial: 42
+    unit_of_measurement: '%'
+  demo_hru_filter:
+    name: Demo filter clogging
+    min: 0
+    max: 100
+    step: 1
+    initial: 62
+    unit_of_measurement: '%'
+
+input_boolean:
+  demo_hru_bypass:
+    name: Demo bypass
+  demo_hru_heater:
+    name: Demo heater
+  demo_hru_defrost:
+    name: Demo defrost
+
+template:
+  - sensor:
+      - name: Demo HRU intake temperature
+        unique_id: demo_hru_intake_temperature
+        unit_of_measurement: '°C'
+        device_class: temperature
+        state: "{{ states('input_number.demo_hru_outdoor') | float(0) }}"
+      - name: Demo HRU extract temperature
+        unique_id: demo_hru_extract_temperature
+        unit_of_measurement: '°C'
+        device_class: temperature
+        state: '22.0'
+      - name: Demo HRU supply temperature
+        unique_id: demo_hru_supply_temperature
+        unit_of_measurement: '°C'
+        device_class: temperature
+        # 86 % recovery between intake and extract.
+        state: >
+          {% set i = states('input_number.demo_hru_outdoor') | float(0) %}
+          {{ (i + 0.86 * (22.0 - i)) | round(1) }}
+      - name: Demo HRU exhaust temperature
+        unique_id: demo_hru_exhaust_temperature
+        unit_of_measurement: '°C'
+        device_class: temperature
+        state: >
+          {% set i = states('input_number.demo_hru_outdoor') | float(0) %}
+          {{ (22.0 - 0.86 * (22.0 - i)) | round(1) }}
+      - name: Demo HRU supply fan
+        unique_id: demo_hru_supply_fan
+        unit_of_measurement: '%'
+        state: >
+          {{ 0 if states('input_select.demo_hru_mode') in ['Standby', 'Off']
+             else states('input_number.demo_hru_supply_fan') | int(0) }}
+      - name: Demo HRU extract fan
+        unique_id: demo_hru_extract_fan
+        unit_of_measurement: '%'
+        state: >
+          {{ 0 if states('input_select.demo_hru_mode') in ['Standby', 'Off']
+             else states('input_number.demo_hru_extract_fan') | int(0) }}
+      - name: Demo HRU filter
+        unique_id: demo_hru_filter
+        unit_of_measurement: '%'
+        state: "{{ states('input_number.demo_hru_filter') | int(0) }}"
+      - name: Demo HRU power
+        unique_id: demo_hru_power
+        unit_of_measurement: W
+        device_class: power
+        state: '48'
+  # The card reads bypass/heater/defrost from binary_sensor, switch or sensor entities.
+  - binary_sensor:
+      - name: Demo HRU bypass
+        unique_id: demo_hru_bypass
+        state: "{{ is_state('input_boolean.demo_hru_bypass', 'on') }}"
+      - name: Demo HRU heater
+        unique_id: demo_hru_heater
+        state: "{{ is_state('input_boolean.demo_hru_heater', 'on') }}"
+      - name: Demo HRU defrost
+        unique_id: demo_hru_defrost
+        state: "{{ is_state('input_boolean.demo_hru_defrost', 'on') }}"
+
+# Card YAML:
+#
+# type: custom:hru-card
+# intake_temp: sensor.demo_hru_intake_temperature
+# supply_temp: sensor.demo_hru_supply_temperature
+# extract_temp: sensor.demo_hru_extract_temperature
+# exhaust_temp: sensor.demo_hru_exhaust_temperature
+# supply_fan: sensor.demo_hru_supply_fan
+# extract_fan: sensor.demo_hru_extract_fan
+# mode: input_select.demo_hru_mode
+# filter: sensor.demo_hru_filter
+# bypass: binary_sensor.demo_hru_bypass
+# heater: binary_sensor.demo_hru_heater
+# defrost: binary_sensor.demo_hru_defrost
+# power: sensor.demo_hru_power
