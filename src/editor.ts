@@ -1,7 +1,7 @@
 import { LitElement, html, nothing, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { DEFAULTS } from './config';
-import { buildSchema, computeLabel } from './editor-schema';
+import { buildSchema, computeHelper, computeLabel } from './editor-schema';
 import type { HomeAssistant, HruCardConfig } from './types';
 
 const SCHEMA = buildSchema();
@@ -32,6 +32,7 @@ export class HruCardEditor extends LitElement {
       .data=${{ ...DEFAULTS, ...this.config }}
       .schema=${SCHEMA}
       .computeLabel=${computeLabel}
+      .computeHelper=${computeHelper}
       @value-changed=${this.valueChanged}
     ></ha-form>`;
   }

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ROLE_DOMAINS } from '../src/config';
 import {
   buildSchema,
+  computeHelper,
   computeLabel,
   type HaFormField,
   type HaFormSchema,
@@ -101,6 +102,17 @@ describe('computeLabel', () => {
   });
 });
 
+describe('computeHelper', () => {
+  it('explains every field', () => {
+    for (const f of flatten(buildSchema())) expect(computeHelper(f)).toBeTruthy();
+  });
+
+  it('gives sections and unknown keys no helper', () => {
+    for (const s of buildSchema()) expect(computeHelper(s)).toBeUndefined();
+    expect(computeHelper({ name: 'mode_speeds' })).toBeUndefined();
+  });
+});
+
 describe('HruCardEditor', () => {
   async function mountEditor() {
     const el = document.createElement('hru-card-editor');
@@ -123,10 +135,17 @@ describe('HruCardEditor', () => {
   it('renders ha-form with data and schema', async () => {
     const { el } = await mountEditor();
     const form = el.shadowRoot?.querySelector('ha-form') as
-      (HTMLElement & { data: unknown; schema: unknown; computeLabel: unknown }) | null;
+      | (HTMLElement & {
+          data: unknown;
+          schema: unknown;
+          computeLabel: unknown;
+          computeHelper: unknown;
+        })
+      | null;
     expect(form?.data).toMatchObject({ supply_temp: 'sensor.s' });
     expect(form?.schema).toEqual(buildSchema());
     expect(form?.computeLabel).toBe(computeLabel);
+    expect(form?.computeHelper).toBe(computeHelper);
     el.remove();
   });
 
