@@ -105,3 +105,9 @@ export function computeLabel(schema: { name: string }): string {
   const labels: Partial<Record<string, string>> = S.editor;
   return labels[schema.name] ?? schema.name;
 }
+
+/** Helper text under a field; sections and unknown keys get none. */
+export function computeHelper(schema: { name: string }): string | undefined {
+  const helpers: Partial<Record<string, string>> = S.editorHelp;
+  return helpers[schema.name];
+}

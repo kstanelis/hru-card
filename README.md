@@ -17,7 +17,7 @@ state. It never sends commands to your unit; tapping a value opens its more-info
 - **Motion with meaning:** air and fan speed follow the unit's mode. Everything stops when the unit
   is off or in standby. The `prefers-reduced-motion` setting is respected.
 - **Native look:** follows your HA theme, light and dark, and your accent colour.
-- **Visual editor:** entity pickers filtered to fitting domains, so no YAML is needed.
+- **Visual editor:** entity pickers filtered to fitting domains and a short explanation under every field, so no YAML is needed.
 - **Card picker suggestions (HA 2026.6+):** when you pick a temperature sensor of a ventilation
   device, the card appears under _Community_, pre-filled with the device's entities.
 
