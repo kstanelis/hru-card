@@ -1,7 +1,14 @@
 import { css, html, nothing, svg, type TemplateResult } from 'lit';
 import { S } from '../strings';
 import type { CardModel, FanValue, RenderCtx, TempKey } from '../types';
-import { renderChips, renderHeader, renderRecovery, renderTemp, tappable } from './shared';
+import {
+  renderChips,
+  renderHeader,
+  renderRecovery,
+  renderTarget,
+  renderTemp,
+  tappable,
+} from './shared';
 
 const SUPPLY_PATH = 'M 20 60 C 170 60, 268 180, 418 180';
 const EXTRACT_PATH = 'M 418 60 C 268 60, 170 180, 20 180';
@@ -63,7 +70,7 @@ export function renderFlow(m: CardModel, ctx: RenderCtx): TemplateResult {
       </svg>
       ${corner(m, 'intake', ctx)} ${corner(m, 'extract', ctx)}
       ${corner(m, 'exhaust', ctx, m.fans.extract, false)}
-      ${corner(m, 'supply', ctx, m.fans.supply, false)} ${badge(m, ctx)}
+      ${corner(m, 'supply', ctx, m.fans.supply, false)} ${badge(m, ctx)} ${renderTarget(m, ctx)}
     </div>
     ${renderChips(m.chips, m.filter, ctx)} ${extras(m, ctx)}`;
 }
@@ -147,6 +154,12 @@ export const flowStyles = css`
   .pct {
     font-size: 22px;
     font-weight: 500;
+  }
+  .diagram > .target {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 50px);
+    transform: translateX(-50%);
   }
   .badge .label {
     font-size: 11px;

@@ -119,4 +119,29 @@ describe('renderFlow', () => {
     const { el } = mount(cardModel({ extras: [] }));
     expect(el.querySelector('.extras')).toBeNull();
   });
+
+  it('shows the target temperature under the badge and opens its entity', () => {
+    const { el, moreInfo } = mount(
+      cardModel({ target: { entity: 'sensor.target', display: '21.0°' } }),
+    );
+    const target = el.querySelector('.target');
+    expect(target?.textContent.replace(/\s+/g, ' ').trim()).toBe('Target 21.0°');
+    target?.querySelector<HTMLButtonElement>('button.value')?.click();
+    expect(moreInfo).toHaveBeenCalledWith('sensor.target');
+  });
+
+  it('keeps the target temperature while stopped', () => {
+    const { el } = mount(
+      cardModel({
+        running: false,
+        stopped: { label: 'Unit off', icon: 'mdi:power' },
+        target: { entity: 'sensor.target', display: '21.0°' },
+      }),
+    );
+    expect(el.querySelector('.target')).not.toBeNull();
+  });
+
+  it('omits the target temperature when not mapped', () => {
+    expect(mount(cardModel()).el.querySelector('.target')).toBeNull();
+  });
 });

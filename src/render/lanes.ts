@@ -6,6 +6,7 @@ import {
   renderChips,
   renderHeader,
   renderRecovery,
+  renderTarget,
   renderTemp,
   SEVERITY_COLOR,
   tappable,
@@ -81,7 +82,7 @@ export function renderLanes(m: CardModel, ctx: RenderCtx): TemplateResult {
       ${box(m, 'intake', 'cool', ctx, html`<span class="sub">${S.freshAirIn}</span>`)}
       <div class="middle">
         ${arrow('supply', 'right')}
-        <div class="recovery">${renderRecovery(m, ctx, 24)}</div>
+        <div class="recovery">${renderRecovery(m, ctx, 24)} ${renderTarget(m, ctx)}</div>
         ${arrow('extract', 'left')}
       </div>
       ${box(m, 'supply', 'warm', ctx, fanLine(m.fans.supply))}

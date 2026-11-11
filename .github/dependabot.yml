@@ -11,6 +11,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # eslint 10 pulls minimatch 10.x via @eslint/config-array, which fails
+      # `npm audit` (GHSA-g3hv-75wg-m249). Revisit once it moves to minimatch 11.
+      - dependency-name: eslint
+        update-types: ['version-update:semver-major']
     groups:
       dev-dependencies:
         dependency-type: development
