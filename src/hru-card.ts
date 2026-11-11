@@ -102,24 +102,25 @@ export class HruCard extends LitElement {
   }
 
   getCardSize(): number {
-    return CARD_SIZE[this.layout];
+    return CARD_SIZE[this.layoutName];
   }
 
   /** Sections grid, HA 2024.11+. */
   getGridOptions(): { columns: number; min_columns: number } {
-    return this.layout === 'compact'
+    return this.layoutName === 'compact'
       ? { columns: 6, min_columns: 6 }
       : { columns: 12, min_columns: 9 };
   }
 
   /** Sections grid, HA 2024.8–2024.10 (4-column). */
   getLayoutOptions(): { grid_columns: number; grid_min_columns: number } {
-    return this.layout === 'compact'
+    return this.layoutName === 'compact'
       ? { grid_columns: 2, grid_min_columns: 2 }
       : { grid_columns: 4, grid_min_columns: 3 };
   }
 
-  private get layout(): Layout {
+  /** Not named `layout`: HA assigns `card.layout` on every card element. */
+  private get layoutName(): Layout {
     return this.config?.layout ?? 'flow';
   }
 

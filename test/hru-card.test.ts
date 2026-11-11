@@ -157,6 +157,14 @@ describe('hru-card element', () => {
     expect(sync).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), false);
   });
 
+  it('accepts the layout property HA assigns to every card', async () => {
+    const el = await mount({ ...CONFIG, layout: 'compact' });
+    expect(() => {
+      (el as unknown as { layout: string }).layout = 'grid';
+    }).not.toThrow();
+    expect(el.getCardSize()).toBe(4);
+  });
+
   it('getCardSize per layout', async () => {
     expect((await mount()).getCardSize()).toBe(6);
     expect((await mount({ ...CONFIG, layout: 'lanes' })).getCardSize()).toBe(7);
