@@ -143,12 +143,13 @@ describe('renderCompact', () => {
     expect(mount(m).el.querySelector('.meters')).toBeNull();
   });
 
-  it('hero for unmapped supply is a plain —', () => {
-    const m = cardModel({ hero: { label: 'Supply air', display: '—', sub: null } });
+  it('hero without supply is only a plain —, no label', () => {
+    const m = cardModel({ hero: { label: null, display: '—', sub: null } });
     delete m.temps.supply;
     const { el } = mount(m);
     expect(el.querySelector('.hero button.value')).toBeNull();
-    expect(text(el.querySelector('.hero-value'))).toBe('—');
+    expect(el.querySelector('.hero-label')).toBeNull();
+    expect(text(el.querySelector('.hero'))).toBe('—');
   });
 
   it('fans without a filter show only fan meters', () => {

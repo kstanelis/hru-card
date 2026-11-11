@@ -123,9 +123,10 @@ export interface CardModel {
   filter: FilterView | null;
   chips: Chip[];
   extras: Extra[];
-  /** Compact layout's big supply-air reading; always supply, "—" when missing. */
+  /** Compact layout's big supply-air reading; always supply, only "—" when missing. */
   hero: {
-    label: string;
+    /** "Supply air"; null when supply has no value (only "—" is shown). */
+    label: string | null;
     display: string;
     /** Small line under the value; `entity` makes it tappable (the target temperature). */
     sub: { text: string; entity: string | null } | null;

@@ -174,7 +174,7 @@ describe('buildModel', () => {
     const m = buildModel(makeHass([]), CONFIG);
     expect(m.temps.intake?.display).toBe('—');
     expect(m.recovery).toBeNull();
-    expect(m.hero).toEqual({ label: 'Supply air', display: '—', sub: null });
+    expect(m.hero).toEqual({ label: null, display: '—', sub: null });
     expect(m.mode).toBeNull();
     expect(m.fans.supply?.display).toBe('—');
     expect(m.filter?.label).toBe('Filter —');
@@ -185,13 +185,13 @@ describe('buildModel', () => {
   it('hero stays on supply and shows — when supply is unmapped (no fallback)', () => {
     const cfg = { ...CONFIG, supply_temp: undefined };
     const m = buildModel(sample(), cfg);
-    expect(m.hero).toEqual({ label: 'Supply air', display: '—', sub: null });
+    expect(m.hero).toEqual({ label: null, display: '—', sub: null });
     expect(m.tempCount).toBe(3);
   });
 
   it('hero shows — when supply is unavailable (no fallback)', () => {
     const m = buildModel(sample({ 'sensor.supply': 'unavailable' }), CONFIG);
-    expect(m.hero).toEqual({ label: 'Supply air', display: '—', sub: null });
+    expect(m.hero).toEqual({ label: null, display: '—', sub: null });
   });
 
   it('hero without intake has no sub', () => {
@@ -388,7 +388,7 @@ describe('buildModel', () => {
       hass.states['sensor.target'] = state('sensor.target', '21.5');
       const cfg = { ...withTarget('sensor.target'), supply_temp: undefined };
       expect(buildModel(hass, cfg).hero).toEqual({
-        label: 'Supply air',
+        label: null,
         display: '—',
         sub: { text: 'target 21.5°', entity: 'sensor.target' },
       });

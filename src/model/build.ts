@@ -196,14 +196,15 @@ export function buildModel(hass: HomeAssistant, config: HruCardConfig): CardMode
       }
     : null;
 
-  // Compact hero is always supply air: no fallback to another temperature, "—" when missing.
+  // Compact hero is always supply air (no fallback); only "—" without a label when missing.
   const { supply, intake } = temps;
+  const hasSupply = supply?.value != null;
   const hero = {
-    label: `${S.supply}${S.airSuffix}`,
+    label: hasSupply ? `${S.supply}${S.airSuffix}` : null,
     display: supply?.display ?? S.noValue,
     sub: target
       ? { text: S.targetSub(target.display), entity: target.entity }
-      : supply?.value != null && intake?.value != null
+      : hasSupply && intake?.value != null
         ? { text: S.fromIntake(intake.display), entity: null }
         : null,
   };

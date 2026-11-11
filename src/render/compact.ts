@@ -30,7 +30,7 @@ function hero(m: CardModel, ctx: RenderCtx): TemplateResult {
     sub = h.sub.entity ? tappable(h.sub.entity, ctx, text) : text;
   }
   return html`<div class="hero">
-    <span class="hero-label">${h.label}</span>
+    ${h.label ? html`<span class="hero-label">${h.label}</span>` : nothing}
     ${entity ? tappable(entity, ctx, value) : value} ${sub}
   </div>`;
 }

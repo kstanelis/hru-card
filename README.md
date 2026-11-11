@@ -92,8 +92,8 @@ missing or extract and intake differ by less than 1 °C.
 `target_temp` shows a small "Target 21.0°" line under the recovery badge (flow), in the middle
 block (lanes), and in place of "from … intake" under the supply-air temperature (compact).
 
-The compact layout always shows supply air as its big temperature; it shows "—" when
-`supply_temp` is unmapped or unavailable, never another temperature.
+The compact layout always shows supply air as its big temperature; when `supply_temp` is
+unmapped or unavailable it shows only "—" (no label), never another temperature.
 
 ### Style and behaviour
 
