@@ -20,15 +20,18 @@ const STRIP: readonly [TempKey, 'cool' | 'warm'][] = [
   ['exhaust', 'cool'],
 ];
 
-function hero(m: CardModel, ctx: RenderCtx): TemplateResult | typeof nothing {
+function hero(m: CardModel, ctx: RenderCtx): TemplateResult {
   const h = m.hero;
-  if (!h) return nothing;
-  const entity = m.temps[h.key]?.entity;
+  const entity = m.temps.supply?.entity;
   const value = html`<span class="hero-value">${h.display}</span>`;
+  let sub: TemplateResult | typeof nothing = nothing;
+  if (h.sub) {
+    const text = html`<span class="hero-sub">${h.sub.text}</span>`;
+    sub = h.sub.entity ? tappable(h.sub.entity, ctx, text) : text;
+  }
   return html`<div class="hero">
     <span class="hero-label">${h.label}</span>
-    ${entity ? tappable(entity, ctx, value) : value}
-    ${h.sub ? html`<span class="hero-sub">${h.sub}</span>` : nothing}
+    ${entity ? tappable(entity, ctx, value) : value} ${sub}
   </div>`;
 }
 

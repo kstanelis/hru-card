@@ -51,8 +51,8 @@ describe('buildModel', () => {
     expect(m.motion.extract).toBeCloseTo(0.4 + 0.58 * 2.6);
     expect(m.motion.spin).toBe(2.4);
     expect(m.chips).toHaveLength(3);
-    expect(m.hero?.display).toBe('19.5°');
-    expect(m.hero?.sub).toBe('from 4.0° intake');
+    expect(m.hero.display).toBe('19.5°');
+    expect(m.hero.sub).toEqual({ text: 'from 4.0° intake', entity: null });
     expect(m.name).toBe('Ventilation');
     expect(m.icon).toBe('mdi:fan');
     expect(m.mode).toEqual({ entity: 'select.mode', label: 'Normal' });
@@ -174,7 +174,7 @@ describe('buildModel', () => {
     const m = buildModel(makeHass([]), CONFIG);
     expect(m.temps.intake?.display).toBe('—');
     expect(m.recovery).toBeNull();
-    expect(m.hero).toBeNull();
+    expect(m.hero).toEqual({ label: 'Supply air', display: '—', sub: null });
     expect(m.mode).toBeNull();
     expect(m.fans.supply?.display).toBe('—');
     expect(m.filter?.label).toBe('Filter —');
@@ -182,17 +182,22 @@ describe('buildModel', () => {
     expect(m.extras[0]?.display).toBe('—');
   });
 
-  it('hero fallback', () => {
+  it('hero stays on supply and shows — when supply is unmapped (no fallback)', () => {
     const cfg = { ...CONFIG, supply_temp: undefined };
     const m = buildModel(sample(), cfg);
-    expect(m.hero).toEqual({ key: 'extract', label: 'Extract air', display: '22.0°', sub: null });
+    expect(m.hero).toEqual({ label: 'Supply air', display: '—', sub: null });
     expect(m.tempCount).toBe(3);
+  });
+
+  it('hero shows — when supply is unavailable (no fallback)', () => {
+    const m = buildModel(sample({ 'sensor.supply': 'unavailable' }), CONFIG);
+    expect(m.hero).toEqual({ label: 'Supply air', display: '—', sub: null });
   });
 
   it('hero without intake has no sub', () => {
     const m = buildModel(sample({ 'sensor.intake': 'unavailable' }), CONFIG);
-    expect(m.hero?.key).toBe('supply');
-    expect(m.hero?.sub).toBeNull();
+    expect(m.hero.display).toBe('19.5°');
+    expect(m.hero.sub).toBeNull();
   });
 
   it('efficiency sensor wins', () => {
@@ -331,5 +336,62 @@ describe('buildModel', () => {
       rpm: '1500 rpm',
     });
     expect(m.fans.extract?.level).toBe(60);
+  });
+
+  describe('target temperature', () => {
+    const withTarget = (id: string): HruCardConfig => ({ ...CONFIG, target_temp: id });
+
+    it('is null when target_temp is not mapped', () => {
+      expect(buildModel(sample(), CONFIG).target).toBeNull();
+    });
+
+    it('reads a sensor state', () => {
+      const hass = sample();
+      hass.states['sensor.target'] = state('sensor.target', '21.5', { unit_of_measurement: '°C' });
+      const m = buildModel(hass, withTarget('sensor.target'));
+      expect(m.target).toEqual({ entity: 'sensor.target', display: '21.5°' });
+    });
+
+    it('reads the setpoint attribute of a climate entity', () => {
+      const hass = sample();
+      hass.states['climate.hru'] = state('climate.hru', 'heat', { temperature: 21 });
+      expect(buildModel(hass, withTarget('climate.hru')).target?.display).toBe('21.0°');
+    });
+
+    it('shows — when the climate entity has no setpoint', () => {
+      const hass = sample();
+      hass.states['climate.hru'] = state('climate.hru', 'heat', {});
+      expect(buildModel(hass, withTarget('climate.hru')).target?.display).toBe('—');
+    });
+
+    it('shows — when the entity is unavailable or missing', () => {
+      const hass = sample();
+      hass.states['sensor.target'] = state('sensor.target', 'unavailable');
+      expect(buildModel(hass, withTarget('sensor.target')).target).toEqual({
+        entity: 'sensor.target',
+        display: '—',
+      });
+      expect(buildModel(sample(), withTarget('sensor.missing')).target?.display).toBe('—');
+    });
+
+    it('replaces the "from intake" hero line', () => {
+      const hass = sample();
+      hass.states['sensor.target'] = state('sensor.target', '21.5');
+      expect(buildModel(hass, withTarget('sensor.target')).hero.sub).toEqual({
+        text: 'target 21.5°',
+        entity: 'sensor.target',
+      });
+    });
+
+    it('shows the target under the supply hero even when supply is unmapped', () => {
+      const hass = sample();
+      hass.states['sensor.target'] = state('sensor.target', '21.5');
+      const cfg = { ...withTarget('sensor.target'), supply_temp: undefined };
+      expect(buildModel(hass, cfg).hero).toEqual({
+        label: 'Supply air',
+        display: '—',
+        sub: { text: 'target 21.5°', entity: 'sensor.target' },
+      });
+    });
   });
 });

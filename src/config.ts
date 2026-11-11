@@ -29,6 +29,7 @@ export type EntityRole =
   | 'supply_temp'
   | 'extract_temp'
   | 'exhaust_temp'
+  | 'target_temp'
   | 'supply_fan'
   | 'extract_fan'
   | 'mode'
@@ -49,6 +50,7 @@ export const ROLE_DOMAINS: Record<EntityRole, string[]> = {
   supply_temp: ['sensor'],
   extract_temp: ['sensor'],
   exhaust_temp: ['sensor'],
+  target_temp: ['sensor', 'number', 'input_number', 'climate'],
   supply_fan: ['sensor', 'fan', 'number'],
   extract_fan: ['sensor', 'fan', 'number'],
   mode: ['select', 'input_select', 'fan', 'climate', 'sensor'],

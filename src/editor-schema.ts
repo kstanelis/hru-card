@@ -71,6 +71,7 @@ export function buildSchema(): HaFormSection[] {
       entity('supply_temp'),
       entity('extract_temp'),
       entity('exhaust_temp'),
+      entity('target_temp'),
     ]),
     section('fans', [
       entity('supply_fan'),

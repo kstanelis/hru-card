@@ -111,6 +111,11 @@ describe('validateConfig', () => {
       'supply_temp: expected sensor entity, got number.x',
     ]);
   });
+
+  it('target_temp accepts a climate entity and warns on other domains', () => {
+    expect(validateConfig({ ...MIN, target_temp: 'climate.hru' }).warnings).toEqual([]);
+    expect(validateConfig({ ...MIN, target_temp: 'switch.x' }).warnings).toHaveLength(1);
+  });
   it('fewer than two temperatures warns', () => {
     expect(validateConfig({ type: 'custom:hru-card', supply_temp: 'sensor.s' }).warnings).toEqual([
       'map at least two of intake_temp, supply_temp, extract_temp, exhaust_temp',
@@ -144,6 +149,7 @@ describe('withDefaults', () => {
   it('DEFAULTS and ROLE_DOMAINS', () => {
     expect(DEFAULTS.layout).toBe('flow');
     expect(ROLE_DOMAINS.mode).toEqual(['select', 'input_select', 'fan', 'climate', 'sensor']);
-    expect(Object.keys(ROLE_DOMAINS)).toHaveLength(17);
+    expect(Object.keys(ROLE_DOMAINS)).toHaveLength(18);
+    expect(ROLE_DOMAINS.target_temp).toEqual(['sensor', 'number', 'input_number', 'climate']);
   });
 });

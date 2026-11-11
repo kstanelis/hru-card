@@ -63,7 +63,12 @@ export function cardModel(over: Partial<CardModel> = {}): CardModel {
       { key: 'recovered_power', entity: 'sensor.recovered', label: 'Recovered', display: '1.2 kW' },
       { key: 'power', entity: 'sensor.power', label: 'Power', display: '48 W' },
     ],
-    hero: { key: 'supply', label: 'Supply air', display: '19.5°', sub: 'from 4.0° intake' },
+    hero: {
+      label: 'Supply air',
+      display: '19.5°',
+      sub: { text: 'from 4.0° intake', entity: null },
+    },
+    target: null,
     ...over,
   };
 }

@@ -14,6 +14,7 @@ export interface HruCardConfig {
   supply_temp?: string;
   extract_temp?: string;
   exhaust_temp?: string;
+  target_temp?: string;
   supply_fan?: string;
   extract_fan?: string;
   max_rpm?: number;
@@ -122,7 +123,15 @@ export interface CardModel {
   filter: FilterView | null;
   chips: Chip[];
   extras: Extra[];
-  hero: { key: TempKey; label: string; display: string; sub: string | null } | null;
+  /** Compact layout's big supply-air reading; always supply, "—" when missing. */
+  hero: {
+    label: string;
+    display: string;
+    /** Small line under the value; `entity` makes it tappable (the target temperature). */
+    sub: { text: string; entity: string | null } | null;
+  };
+  /** Target (set-point) temperature; null when `target_temp` is not mapped. */
+  target: { entity: string; display: string } | null;
 }
 
 export interface RenderCtx {

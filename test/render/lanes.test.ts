@@ -128,4 +128,18 @@ describe('renderLanes', () => {
     const { el } = mount(m);
     expect(text(el.querySelector('.box--intake .temp'))).toBe('—');
   });
+
+  it('shows the target temperature in the middle block and opens its entity', () => {
+    const { el, moreInfo } = mount(
+      cardModel({ target: { entity: 'sensor.target', display: '21.0°' } }),
+    );
+    const target = el.querySelector('.middle .target');
+    expect(target?.textContent.replace(/\s+/g, ' ').trim()).toBe('Target 21.0°');
+    target?.querySelector<HTMLButtonElement>('button.value')?.click();
+    expect(moreInfo).toHaveBeenCalledWith('sensor.target');
+  });
+
+  it('omits the target temperature when not mapped', () => {
+    expect(mount(cardModel()).el.querySelector('.target')).toBeNull();
+  });
 });

@@ -13,7 +13,7 @@ state. It never sends commands to your unit; tapping a value opens its more-info
 - **Three layouts:**
   - `flow`: crossing ducts with moving air.
   - `lanes`: tinted temperature boxes with stat tiles.
-  - `compact`: hero temperature with a recovery ring.
+  - `compact`: big supply-air temperature with a recovery ring.
 - **Motion with meaning:** air and fan speed follow the unit's mode. Everything stops when the unit
   is off or in standby. The `prefers-reduced-motion` setting is respected.
 - **Native look:** follows your HA theme, light and dark, and your accent colour.
@@ -67,6 +67,7 @@ shows a hint instead.
 | `supply_temp`     | Air sent to rooms           | `sensor`                                                           | number                                                       |
 | `extract_temp`    | Stale air pulled from rooms | `sensor`                                                           | number                                                       |
 | `exhaust_temp`    | Air leaving the house       | `sensor`                                                           | number                                                       |
+| `target_temp`     | Target (set-point) temp     | `sensor`, `number`, `input_number`, `climate`                      | number; `climate` uses its `temperature` attribute           |
 | `supply_fan`      | Supply fan speed            | `sensor`, `fan`, `number`                                          | `%`, or `rpm` (scaled by `max_rpm`); `fan` uses `percentage` |
 | `extract_fan`     | Extract fan speed           | `sensor`, `fan`, `number`                                          | same                                                         |
 | `mode`            | Operating mode              | `select`, `input_select`, `fan`, `climate` (preset mode), `sensor` | text, see [Modes](#modes)                                    |
@@ -87,6 +88,12 @@ An unmapped role removes its element: no empty tile or chip. A mapped entity tha
 When `efficiency` is not mapped, recovery is computed as
 `(supply − intake) / (extract − intake) × 100` and shown with "≈". It is hidden when an input is
 missing or extract and intake differ by less than 1 °C.
+
+`target_temp` shows a small "Target 21.0°" line under the recovery badge (flow), in the middle
+block (lanes), and in place of "from … intake" under the supply-air temperature (compact).
+
+The compact layout always shows supply air as its big temperature; it shows "—" when
+`supply_temp` is unmapped or unavailable, never another temperature.
 
 ### Style and behaviour
 

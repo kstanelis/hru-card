@@ -25,7 +25,8 @@ function model(over: Partial<CardModel> = {}): CardModel {
     filter: null,
     chips: [],
     extras: [],
-    hero: null,
+    hero: { label: 'Supply air', display: '—', sub: null },
+    target: null,
     ...over,
   };
 }

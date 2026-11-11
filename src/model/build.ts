@@ -26,7 +26,6 @@ import {
 import { formatTemp, formatValue, readNumber, readOnOff, readState } from './read';
 
 const TEMP_KEYS: TempKey[] = ['intake', 'supply', 'extract', 'exhaust'];
-const HERO_ORDER: TempKey[] = ['supply', 'extract', 'intake', 'exhaust'];
 const EXTRA_KEYS: ExtraKey[] = ['recovered_power', 'power', 'humidity', 'co2', 'airflow'];
 const EXTRA_LABEL: Record<ExtraKey, string> = {
   recovered_power: S.recovered,
@@ -58,6 +57,13 @@ const titleCase = (s: string): string =>
     .replace(/_+/g, ' ')
     .trim()
     .replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+
+/** Set-point value: a climate entity's `temperature` attribute, otherwise the numeric state. */
+function readTarget(hass: HomeAssistant, id: string): number | null {
+  if (!id.startsWith('climate.')) return readNumber(hass, id);
+  const t = readState(hass, id)?.attributes.temperature;
+  return typeof t === 'number' && Number.isFinite(t) ? t : null;
+}
 
 function readModeName(hass: HomeAssistant, id: string | undefined): string | null {
   const entity = readState(hass, id);
@@ -183,21 +189,24 @@ export function buildModel(hass: HomeAssistant, config: HruCardConfig): CardMode
     extras.push({ key, entity, label: EXTRA_LABEL[key], display: formatValue(hass, entity) });
   }
 
-  const heroKey = HERO_ORDER.find((k) => typeof temps[k]?.value === 'number');
-  const heroTemp = heroKey ? temps[heroKey] : undefined;
-  const intake = temps.intake;
-  const hero =
-    heroKey && heroTemp
-      ? {
-          key: heroKey,
-          label: `${heroTemp.label}${S.airSuffix}`,
-          display: heroTemp.display,
-          sub:
-            heroKey === 'supply' && intake && intake.value !== null
-              ? S.fromIntake(intake.display)
-              : null,
-        }
-      : null;
+  const target = config.target_temp
+    ? {
+        entity: config.target_temp,
+        display: formatTemp(hass, readTarget(hass, config.target_temp)),
+      }
+    : null;
+
+  // Compact hero is always supply air: no fallback to another temperature, "—" when missing.
+  const { supply, intake } = temps;
+  const hero = {
+    label: `${S.supply}${S.airSuffix}`,
+    display: supply?.display ?? S.noValue,
+    sub: target
+      ? { text: S.targetSub(target.display), entity: target.entity }
+      : supply?.value != null && intake?.value != null
+        ? { text: S.fromIntake(intake.display), entity: null }
+        : null,
+  };
 
   return {
     name: readName(hass, config),
@@ -215,5 +224,6 @@ export function buildModel(hass: HomeAssistant, config: HruCardConfig): CardMode
     chips,
     extras,
     hero,
+    target,
   };
 }
